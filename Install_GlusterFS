@@ -1,0 +1,55 @@
+I. Server 1
+yum install epel-release -y
+yum update -y
+vi /etc/hosts
+10.11.23.100 gluster01
+10.11.23.112 gluster02
+10.11.23.118 client01
+mkfs.ext4 /dev/sdb
+mkdir -p /upload
+mount  /dev/sdb /upload
+vi /etc/fstab
+/dev/sdb /upload ext4 defaults 1 2
+yum install centos-release-gluster
+yum install glusterfs-server -y
+systemctl enable glusterd
+systemctl start glusterd
+firewall-cmd --zone=public --add-port=24007-24008/tcp --permanent
+firewall-cmd --zone=public --add-port=24009/tcp --permanent
+firewall-cmd --zone=public --add-service=nfs --add-service=samba --add-service=samba-client --permanent
+irewall-cmd --zone=public --add-port=111/tcp --add-port=139/tcp --add-port=445/tcp --add-port=965/tcp --add-port=2049/tcp --add-port=38465-38469/tcp --add-port=631/tcp --add-port=111/udp --add-port=963/udp --add-port=49152-49251/tcp --permanent
+firewall-cmd --reload
+gluster peer probe gluster02
+gluster peer status
+mkdir /upload/data
+gluster volume create vapp replica 2 10.11.23.100:/upload/data 10.11.23.112:/upload/data
+gluster volume start vapp
+gluster volume info
+gluster volume set vapp ctime off
+II. Server 2
+yum install epel-release -y
+yum update -y
+vi /etc/hosts
+10.11.23.100 gluster01
+10.11.23.112 gluster02
+yum install centos-release-gluster
+yum install glusterfs-server -y
+systemctl enable glusterd
+systemctl start glusterd
+firewall-cmd --zone=public --add-port=24007-24008/tcp --permanent
+firewall-cmd --zone=public --add-port=24009/tcp --permanent
+firewall-cmd --zone=public --add-service=nfs --add-service=samba --add-service=samba-client --permanent
+irewall-cmd --zone=public --add-port=111/tcp --add-port=139/tcp --add-port=445/tcp --add-port=965/tcp --add-port=2049/tcp --add-port=38465-38469/tcp --add-port=631/tcp --add-port=111/udp --add-port=963/udp --add-port=49152-49251/tcp --permanent
+firewall-cmd --reload
+gluster peer probe gluster01
+gluster peer status
+III. Client
+yum install epel-release -y
+yum update -y
+yum -y install glusterfs-client
+mkdir -p /upload
+mount.glusterfs 10.11.23.100:/vapp /upload
+vi /etc/fstab
+10.11.23.100:/vapp /upload  glusterfs defaults,_netdev 0 0
+firewall-cmd --zone=public --add-rich-rule='rule family="ipv4" source address="10.11.23.100" accept'
+firewall-cmd --reload
