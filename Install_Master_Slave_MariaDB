@@ -1,0 +1,77 @@
+10.11.23.140 Master
+10.11.23.141 Slave
+
+## I. Master Server
+ 
+yum install epel-release -y
+yum update -y
+vi /etc/yum.repos.d/mariadb.repo
+ 
+# MariaDB 10.2 CentOS repository list - created 2019-09-20 16:34 UTC
+# http://downloads.mariadb.org/mariadb/repositories/
+[mariadb]
+name = MariaDB
+baseurl = http://yum.mariadb.org/10.2/centos7-amd64
+gpgkey=https://yum.mariadb.org/RPM-GPG-KEY-MariaDB
+gpgcheck=1
+ 
+=> Create repo at link https://downloads.mariadb.org/mariadb/repositories
+yum install MariaDB-server MariaDB-client -y
+systemctl start mariadb
+systemctl enable mariadb
+/usr/bin/mysql_secure_installation # create root mariadb
+vi /root/.my.cnf # create quickly access mysql root
+[client]
+  user            =root
+  password        =ye74b87EYP7CsdAFDD
+chmod 400 /root/.my.cnf
+mkdir -p /var/log/mariadb/
+chown -R mysql. /var/log/mariadb/
+ 
+## II. Server Master
+vi /etc/my.cnf.d/server.cnf
+server_id           = 1
+log_bin             = /var/log/mariadb/mariadb-bin.log
+log_bin_index       = /var/log/mariadb/mariadb-bin.log.index
+relay_log           = /var/log/mariadb/mariadb-relay-bin
+relay_log_index     = /var/log/mariadb/mariadb-relay-bin.index
+expire_logs_days    = 10
+max_binlog_size     = 100M
+log_slave_updates   = 1
+auto-increment-increment = 2
+auto-increment-offset = 1
+bind-address    = x.x.x.x # replace x.x.x.x by IP Address of Master
+ 
+systemctl restart mariadb
+mysql
+CREATE USER 'replicate'@'%' IDENTIFIED BY 'B94Dz357dpj4KE7U';
+GRANT REPLICATION SLAVE ON *.* TO 'replicate'@'%' IDENTIFIED BY 'B94Dz357dpj4KE7U';
+FLUSH PRIVILEGES;
+FLUSH TABLES WITH READ LOCK;
+=> Test user and password new create at master server 02 with command line mysql -u replicate -p -h x.x.x.x -P 3306
+SHOW MASTER STATUS;
+UNLOCK TABLES;
+ 
+### III. Server Slave
+vi /etc/my.cnf.d/server.cnf
+server_id           = 2
+log_bin             = /var/log/mariadb/mariadb-bin.log
+log_bin_index       = /var/log/mariadb/mariadb-bin.log.index
+relay_log           = /var/log/mariadb/mariadb-relay-bin
+relay_log_index     = /var/log/mariadb/mariadb-relay-bin.index
+expire_logs_days    = 10
+max_binlog_size     = 100M
+auto-increment-increment = 2
+auto-increment-offset = 1
+bind-address    = x.x.x.x # replace x.x.x.x by IP Address of Slave
+systemctl restart mariadb
+mysql
+CHANGE MASTER TO master_host='10.11.23.140', master_port=3306, master_user='replicate', master_password='B94Dz357dpj4KE7U', master_log_file='mariadb-bin.000002', master_log_pos=344;
+START SLAVE;
+SHOW SLAVE STATUS\G;
+#### IV. Test
+=> Master
+create database test;
+create table test.flowers (`id` varchar(10));
+=> Slave
+show tables in test;
