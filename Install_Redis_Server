@@ -1,1 +1,36 @@
-Demo
+CentOS 8
+dnf install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
+dnf install epel-release dnf-utils
+dnf-config-manager --enable remi
+dnf install redis
+systemctl start redis.service
+systemctl enable redis.service
+redis-cli ping
+CentOS 7
+yum install epel-release yum-utils
+rpm -Uvh http://rpms.remirepo.net/enterprise/remi-release-7.rpm
+yum-config-manager --enable remi
+yum install redis
+systemctl start redis.service
+systemctl enable redis.service
+redis-cli ping
+
+=> Master - Slave Replication Redis
+Master Redis
+vi /etc/redis.conf
+bind 127.0.0.1 your_private_ip_master your_private_ip_slave
+tcp-keepalive 60
+requirepass P5zwBWX2fZPkbkNc
+maxmemory-policy noeviction
+appendonly yes
+appendfilename "appendonly.aof"
+systemctl restart redis.service
+Slave Redis
+vi /etc/redis.conf
+bind 127.0.0.1 your_private_ip_master your_private_ip_slave
+requirepass P5zwBWX2fZPkbkNc
+slaveof your_redis_master_ip 6379
+masterauth your_redis_master_password
+systemctl restart redis.service
+redis-cli -h 127.0.0.1 -p 6379 
+AUTH your_redis_slave_password
