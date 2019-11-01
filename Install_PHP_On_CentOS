@@ -1,0 +1,31 @@
+CentOS 7
+yum install epel-release
+rpm -Uvh http://rpms.remirepo.net/enterprise/remi-release-7.rpm
+yum -y install yum-utils
+yum-config-manager --enable remi-phpxx # Enable
+yum-config-manager --disable remi-phpxx # Disable
+yum install -y php php-cli php-common # Install PHP default
+yum install -y php-fpm # Install PHP-FPM
+yum install -y php-mysqlnd # Extension
+#Extension Wordpress
+yum install -y php-dom php-simplexml php-ssh2 php-xml php-xmlreader php-curl php-date php-exif php-filter php-ftp php-gd php-hash php-iconv php-json php-libxml php-pecl-imagick
+php-mbstring php-mysqlnd php-openssl php-pcre php-posix php-sockets php-spl php-tokenizer php-zlib
+#Extension Joomla
+yum install -y php-mysqlnd php-zlib php-xml php-pear php-json php-mcrypt php-pecl-imagick
+#Extension Drupal
+yum install -y php-mysqlnd php-date php-dom php-filter php-gd php-hash php-json php-pcre php-pdo php-session php-simplexml php-spl php-tokenizer php-xml
+CentOS 8
+rpm -Uvh https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
+dnf install -y https://rpms.remirepo.net/enterprise/remi-release-8.rpm
+dnf module list php
+dnf module enable php:remi-7.3 -y
+dnf install -y php php-cli php-common # Install PHP default
+dnf install -y php-fpm # Install PHP-FPM
+dnf install -y php-mysqlnd # Extension
+#Extension Wordpress
+dnf install -y php-dom php-simplexml php-ssh2 php-xml php-xmlreader php-curl php-date php-exif php-filter php-ftp php-gd php-hash php-iconv php-json php-libxml php-pecl-imagick
+php-mbstring php-mysqlnd php-openssl php-pcre php-posix php-sockets php-spl php-tokenizer php-zlib
+#Extension Joomla
+dnf install -y php-mysqlnd php-zlib php-xml php-pear php-json php-mcrypt php-pecl-imagick
+#Extension Drupal
+dnf install -y php-mysqlnd php-date php-dom php-filter php-gd php-hash php-json php-pcre php-pdo php-session php-simplexml php-spl php-tokenizer php-xml
