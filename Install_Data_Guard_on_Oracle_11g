@@ -1,0 +1,16 @@
+I. Prepare Environment
+Set up Oracle Database 11G
+https://youtu.be/YR4_D-Eavzw
+1. Primary Server
+Install Oracle Database + Instance database
+2. Physical Standby Server
+Instal Oracle Database Only
+II. Set up Data Guard
+1. On Primary Server
+2. On Physical Standby Server
+III. Test
+IV. References
+https://oracle-base.com/articles/11g/data-guard-setup-11gr2
+https://my.oschina.net/rootliu/blog/1557517
+http://www.ocptechnology.com/oracle-dataguard/
+https://valehagayev.wordpress.com/2016/07/09/dataguard-commands-and-sql-scripts/
