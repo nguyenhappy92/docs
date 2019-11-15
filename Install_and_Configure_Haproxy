@@ -1,0 +1,61 @@
+I. Prepare and Install Haproxy
+vi /etc/hosts
+10.11.11.3 ha_inter01
+10.11.11.4 ha_inter02
+yum install epel-release wget -y
+yum update -y
+sed -i --follow-symlinks 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/sysconfig/selinux
+systemctl stop firewalld
+systemctl disable firewalld
+yum install wget gcc pcre-static pcre-devel openssl-devel -y
+cd /opt/
+wget http://www.haproxy.org/download/2.0/src/haproxy-2.0.8.tar.gz
+tar -xvf haproxy-2.0.8.tar.gz
+cd haproxy-2.0.8
+make TARGET=linux-glibc ARCH=native CPU=x86_64 -j8 USE_PCRE=1 USE_OPENSSL=1 USE_ZLIB=1 USE_CRYPT_H=1 USE_LIBCRYPT=1
+make install
+haproxy -v
+yum install -y pacemaker pcs fence-agents-all psmisc policycoreutils-python
+yum -y install pacemaker corosync fence-agents-all fence-agents-virsh fence-virt pacemaker-remote
+systemctl start pacemaker.service
+systemctl enable corosync.service pacemaker.service
+systemctl start pcsd && systemctl enable pcsd
+II. Active
+echo "yourpassword" | passwd --stdin hacluster
+pcs cluster auth ha_inter01 ha_inter01 -u hacluster -p yourpassword
+pcs cluster setup --name haproxy_cluster haproxy_inter_01 haproxy_inter_02
+pcs cluster start --all
+pcs cluster enable --all
+pcs status cluster
+pcs status nodes
+systemctl start corosync.service
+corosync-cmapctl | grep members
+pcs status
+pcs property set stonith-enabled=false
+pcs property set no-quorum-policy=ignore
+pcs property list
+pcs resource create VIP ocf:heartbeat:IPaddr2 ip=IP Virtual cidr_netmask=25 op monitor interval=1s
+III. Passive
+yum install -y pacemaker pcs fence-agents-all psmisc policycoreutils-python
+yum -y install pacemaker corosync fence-agents-all fence-agents-virsh fence-virt pacemaker-remote
+systemctl start pacemaker.service
+systemctl enable corosync.service pacemaker.service
+systemctl start pcsd && systemctl enable pcsd
+echo "P@ssw0rd@789" | passwd --stdin hacluster
+systemctl start pcsd && systemctl enable pcsd
+=> Check Working
+pcs cluster stop haproxy_inter_01
+pcs status
+corosync-cmapctl | grep members
+IV. Hatop Monitor
+cd /opt/
+wget https://storage.googleapis.com/google-code-archive-downloads/v2/code.google.com/hatop/hatop-0.7.7.tar.gz
+tar -xvf hatop-0.7.7.tar.gz
+cd hatop-0.7.7
+install -m 755 bin/hatop /usr/local/bin
+ln -s /usr/local/bin/hatop /usr/bin/
+install -m 644 man/hatop.1 /usr/local/share/man/man1
+hatop --version
+V. References
+https://github.com/hocchudong/ghichep-pacemaker-corosync
+
