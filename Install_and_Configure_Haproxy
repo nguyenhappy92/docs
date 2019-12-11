@@ -14,6 +14,13 @@ tar -xvf haproxy-2.0.8.tar.gz
 cd haproxy-2.0.8
 make TARGET=linux-glibc ARCH=native CPU=x86_64 -j8 USE_PCRE=1 USE_OPENSSL=1 USE_ZLIB=1 USE_CRYPT_H=1 USE_LIBCRYPT=1
 make install
+mkdir -p /etc/haproxy
+mkdir -p /run/haproxy
+mkdir -p /var/lib/haproxy
+touch /var/lib/haproxy/stats
+which haproxy
+ln -s /usr/local/sbin/haproxy /usr/sbin/haproxy
+useradd -r haproxy
 haproxy -v
 yum install -y pacemaker pcs fence-agents-all psmisc policycoreutils-python
 yum -y install pacemaker corosync fence-agents-all fence-agents-virsh fence-virt pacemaker-remote
