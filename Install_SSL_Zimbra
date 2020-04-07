@@ -1,0 +1,21 @@
+Thông thường các chứng chỉ gồm có file Certificate và CA Bundle. Đối với Comodo chúng ta sẽ nhận các file chứng chỉ như sau
+AddTrustExternalCARoot.crt
+COMODORSAAddTrustCA.crt
+COMODORSADomainValidationSecureServerCA.crt
+my_domain_com.crt files
+Nơi lưu trữ SSL Zimbra /opt/zimbra/ssl/zimbra/commercial
+cat AddTrustExternalCARoot.crt COMODORSAAddTrustCA.crt COMODORSADomainValidationSecureServerCA.crt > commercial_ca.crt
+cp my_domain_com.crt > commercial.crt
+Kiểm tra chứng chỉ SSL có hợp lệ hay không
+/opt/zimbra/bin/zmcertmgr verifycrt comm /opt/zimbra/ssl/zimbra/commercial/commercial.key commercial_ca.crt commercial.crt
+=> Kết quả mong đợi Valid Certificate: /tmp/commercial.crt: OK.
+Triển khai cài SSL
+/opt/zimbra/bin/zmcertmgr deploycrt comm /tmp/commercial.crt /tmp/commercial_ca.crt 
+Xem lại SSL đã cài OKay không
+/opt/zimbra/bin/zmcertmgr viewdeployedcrt
+Khởi động lại Zimbra 
+su - zimbra
+zmcontrol stop
+zmcontrol restart
+Check chứng chỉ SSL
+https://www.sslshopper.com/ssl-checker.html
